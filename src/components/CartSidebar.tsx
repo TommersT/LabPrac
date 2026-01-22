@@ -8,7 +8,7 @@ interface CartSidebarProps {
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemoveItem: (id: number) => void;
   onClearCart: () => void;
-  onCheckout: () => void; // Added prop
+  onCheckout: () => void; 
 }
 
 export default function CartSidebar({
@@ -145,7 +145,7 @@ export default function CartSidebar({
                 </div>
 
                 <button 
-                  onClick={onCheckout} // Added click handler
+                  onClick={onCheckout} 
                   className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors mb-3 hover:shadow-lg active:scale-95"
                 >
                   Proceed to Checkout

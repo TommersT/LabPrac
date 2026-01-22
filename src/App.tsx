@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Store, Search, Filter, History } from 'lucide-react';
+import { ShoppingCart, Store, Search, Filter, History, Mail, MapPin, Phone, HelpCircle, Info, ArrowLeft } from 'lucide-react';
 import ProductCard from './components/ProductCard';
 import CartSidebar from './components/CartSidebar';
 import Toast from './components/Toast';
@@ -12,12 +12,11 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'shop' | 'checkout' | 'orders'>('shop');
+  const [currentPage, setCurrentPage] = useState<'shop' | 'checkout' | 'orders' | 'faq' | 'about' | 'contact'>('shop');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load Persisted Data
   useEffect(() => {
     const savedCart = localStorage.getItem('tomishop-cart');
     const savedOrders = localStorage.getItem('tomishop-orders');
@@ -25,7 +24,6 @@ function App() {
     if (savedOrders) setOrders(JSON.parse(savedOrders));
   }, []);
 
-  // Sync with Local Storage
   useEffect(() => {
     localStorage.setItem('tomishop-cart', JSON.stringify(cartItems));
     localStorage.setItem('tomishop-orders', JSON.stringify(orders));
@@ -89,7 +87,6 @@ function App() {
     setToast({ message: 'Order placed successfully!', type: 'success' });
   };
 
-  // Helper to handle logo click: Scroll to top and switch to shop
   const handleLogoClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentPage('shop');
@@ -106,12 +103,10 @@ function App() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header is now fixed at the top with sticky and z-50 */}
-      <header className="sticky top-0 z-50 bg-white shadow-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo area now triggers handleLogoClick */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogoClick}>
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
                 <Store className="text-white" size={28} />
@@ -153,7 +148,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 w-full">
         {currentPage === 'orders' ? (
           <OrdersPage orders={orders} onBack={() => setCurrentPage('shop')} />
         ) : currentPage === 'checkout' ? (
@@ -162,6 +157,79 @@ function App() {
             onBack={() => setCurrentPage('shop')} 
             onCompleteOrder={handleCompleteOrder}
           />
+        ) : currentPage === 'about' ? (
+          <div className="animate-fade-in max-w-3xl mx-auto">
+            <button onClick={() => setCurrentPage('shop')} className="flex items-center gap-2 text-blue-600 mb-8 hover:underline">
+              <ArrowLeft size={20} /> Back to Shop
+            </button>
+            <h2 className="text-4xl font-bold mb-6">About Tomishop</h2>
+            <div className="bg-white p-8 rounded-2xl shadow-sm space-y-4 text-gray-700 leading-relaxed">
+              <p>Welcome to Tomishop, your premier destination for high-quality electronics and lifestyle gear. Founded in 2024, we aim to bridge the gap between innovation and affordability.</p>
+              <p>Our mission is simple: to provide our customers with a curated selection of the best products on the market, backed by exceptional customer service and a seamless shopping experience.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                <div className="border-l-4 border-blue-600 pl-4">
+                  <h4 className="font-bold text-gray-900">Quality Assured</h4>
+                  <p className="text-sm">Every item is checked for quality and performance before it reaches your doorstep.</p>
+                </div>
+                <div className="border-l-4 border-blue-600 pl-4">
+                  <h4 className="font-bold text-gray-900">Fast Delivery</h4>
+                  <p className="text-sm">We partner with top logistics providers to ensure your orders arrive quickly and safely.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : currentPage === 'faq' ? (
+          <div className="animate-fade-in max-w-3xl mx-auto">
+            <button onClick={() => setCurrentPage('shop')} className="flex items-center gap-2 text-blue-600 mb-8 hover:underline">
+              <ArrowLeft size={20} /> Back to Shop
+            </button>
+            <h2 className="text-4xl font-bold mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {[
+                { q: "How long does shipping take?", a: "Standard shipping takes 3-5 business days within Metro Manila and 5-10 days for provincial areas." },
+                { q: "What is your return policy?", a: "We offer a 7-day return policy for manufacturing defects. Items must be in original packaging." },
+                { q: "Do you offer cash on delivery?", a: "Yes, COD is available for most locations nationwide." },
+                { q: "How can I track my order?", a: "Once shipped, you will receive a tracking number via email or you can check your 'My Orders' section." }
+              ].map((item, i) => (
+                <div key={i} className="bg-white p-6 rounded-xl shadow-sm">
+                  <h4 className="font-bold text-lg mb-2 text-blue-700 flex items-center gap-2">
+                    <HelpCircle size={18} /> {item.q}
+                  </h4>
+                  <p className="text-gray-600">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : currentPage === 'contact' ? (
+          <div className="animate-fade-in max-w-4xl mx-auto">
+            <button onClick={() => setCurrentPage('shop')} className="flex items-center gap-2 text-blue-600 mb-8 hover:underline">
+              <ArrowLeft size={20} /> Back to Shop
+            </button>
+            <h2 className="text-4xl font-bold mb-6 text-center">Contact Us</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white p-8 rounded-2xl shadow-sm space-y-6">
+                <h3 className="text-2xl font-bold">Get in Touch</h3>
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full text-blue-600"><Mail size={24} /></div>
+                  <div><p className="font-bold">Email</p><p className="text-gray-600">support@tomishop.com</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full text-blue-600"><Phone size={24} /></div>
+                  <div><p className="font-bold">Phone</p><p className="text-gray-600">+63 912 345 6789</p></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full text-blue-600"><MapPin size={24} /></div>
+                  <div><p className="font-bold">Address</p><p className="text-gray-600">Makati City, Metro Manila, Philippines</p></div>
+                </div>
+              </div>
+              <form className="bg-white p-8 rounded-2xl shadow-sm space-y-4" onSubmit={(e) => { e.preventDefault(); setToast({message: 'Message sent!', type: 'success'})}}>
+                <div><label className="block font-semibold mb-1">Name</label><input type="text" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200" placeholder="Your Name" required /></div>
+                <div><label className="block font-semibold mb-1">Email</label><input type="email" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-200" placeholder="your@email.com" required /></div>
+                <div><label className="block font-semibold mb-1">Message</label><textarea className="w-full p-3 border rounded-lg h-32 outline-none focus:ring-2 focus:ring-blue-200" placeholder="How can we help?" required></textarea></div>
+                <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">Send Message</button>
+              </form>
+            </div>
+          </div>
         ) : (
           <>
             <div className="text-center mb-12 animate-fade-in">
@@ -230,37 +298,30 @@ function App() {
         )}
       </main>
 
+      {/* Simplified Footer as requested */}
       <footer className="bg-gray-900 text-white py-12 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Store size={24} />
-                <h3 className="text-xl font-bold">Tomishop</h3>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                <Store size={24} className="text-blue-400" />
+                <h3 className="text-2xl font-bold">Tomishop</h3>
               </div>
               <p className="text-gray-400">Your trusted online shopping destination</p>
+              <p className="text-gray-500 text-sm mt-4">&copy; 2024 Tomishop. All rights reserved.</p>
             </div>
-            <div>
-              <h4 className="font-bold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li className="hover:text-white cursor-pointer transition-colors">About Us</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Contact</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Shipping Info</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Returns</li>
-              </ul>
+            
+            <div className="flex flex-wrap justify-center gap-8">
+              <button onClick={() => { setCurrentPage('about'); window.scrollTo(0,0); }} className="hover:text-blue-400 transition-colors flex items-center gap-2">
+                <Info size={18} /> About Us
+              </button>
+              <button onClick={() => { setCurrentPage('faq'); window.scrollTo(0,0); }} className="hover:text-blue-400 transition-colors flex items-center gap-2">
+                <HelpCircle size={18} /> FAQ
+              </button>
+              <button onClick={() => { setCurrentPage('contact'); window.scrollTo(0,0); }} className="hover:text-blue-400 transition-colors flex items-center gap-2">
+                <Mail size={18} /> Contact Page
+              </button>
             </div>
-            <div>
-              <h4 className="font-bold mb-4">Customer Service</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li className="hover:text-white cursor-pointer transition-colors">FAQ</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Privacy Policy</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Terms of Service</li>
-                <li className="hover:text-white cursor-pointer transition-colors">Support</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Tomishop. All rights reserved.</p>
           </div>
         </div>
       </footer>
