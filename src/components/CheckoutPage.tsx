@@ -1,11 +1,12 @@
 import { ArrowLeft, CreditCard, Wallet, Truck, CheckCircle2, MapPin, User, Phone } from 'lucide-react';
-import { CartItem } from '../types';
+import { CartItem, ShippingInfo } from '../types'; // Import ShippingInfo type
 import { useState } from 'react';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
   onBack: () => void;
-  onCompleteOrder: () => void;
+  // Updated to accept shipping info and payment method
+  onCompleteOrder: (shippingInfo: ShippingInfo, paymentMethod: string) => void;
 }
 
 type PaymentMethod = 'GCash' | 'COD' | 'Card';
@@ -165,7 +166,8 @@ export default function CheckoutPage({ cartItems, onBack, onCompleteOrder }: Che
             </div>
 
             <button 
-              onClick={onCompleteOrder}
+              // Pass the current states back to the parent App component
+              onClick={() => onCompleteOrder(shippingInfo, paymentMethod)}
               disabled={!shippingInfo.name || !shippingInfo.phone || !shippingInfo.address}
               className="w-full mt-6 bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
             >

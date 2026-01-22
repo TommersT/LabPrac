@@ -89,6 +89,12 @@ function App() {
     setToast({ message: 'Order placed successfully!', type: 'success' });
   };
 
+  // Helper to handle logo click: Scroll to top and switch to shop
+  const handleLogoClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentPage('shop');
+  };
+
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const categories = ['All', ...new Set(products.map((p) => p.category))];
 
@@ -101,10 +107,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <header className="sticky top-0 z-30 bg-white shadow-md">
+      {/* Header is now fixed at the top with sticky and z-50 */}
+      <header className="sticky top-0 z-50 bg-white shadow-md w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('shop')}>
+            {/* Logo area now triggers handleLogoClick */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogoClick}>
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
                 <Store className="text-white" size={28} />
               </div>
