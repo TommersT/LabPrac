@@ -148,7 +148,7 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12 w-full">
+      <main className={`flex-grow w-full ${currentPage === 'shop' ? 'pt-20' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12'}`}>
         {currentPage === 'orders' ? (
           <OrdersPage orders={orders} onBack={() => setCurrentPage('shop')} />
         ) : currentPage === 'checkout' ? (
@@ -164,7 +164,7 @@ function App() {
             </button>
             <h2 className="text-4xl font-bold mb-6">About Tomishop</h2>
             <div className="bg-white p-8 rounded-2xl shadow-sm space-y-4 text-gray-700 leading-relaxed">
-              <p>Welcome to Tomishop, your premier destination for high-quality electronics and lifestyle gear. Founded in 2024, we aim to bridge the gap between innovation and affordability.</p>
+              <p>Welcome to Tomishop, your premier destination for high-quality electronics and lifestyle gear. Founded in 2026, we aim to bridge the gap between innovation and affordability.</p>
               <p>Our mission is simple: to provide our customers with a curated selection of the best products on the market, backed by exceptional customer service and a seamless shopping experience.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                 <div className="border-l-4 border-blue-600 pl-4">
@@ -232,73 +232,91 @@ function App() {
           </div>
         ) : (
           <>
-            <div className="text-center mb-12 animate-fade-in">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Welcome to <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Tomishop</span>
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Discover amazing products at unbeatable prices. Quality guaranteed!
-              </p>
+            {/* HERO SECTION WITH VIDEO BACKGROUND */}
+            <div className="relative h-[400px] w-full flex items-center justify-center overflow-hidden mb-12">
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="absolute z-0 w-full h-full object-cover"
+              >
+                <source src="https://player.vimeo.com/external/434045526.sd.mp4?s=c27cf34190aa0579177a3fa7a48ef89f074d2847&profile_id=165" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              
+              {/* Overlay for text contrast */}
+              <div className="absolute inset-0 z-10 bg-black/40"></div>
+
+              <div className="relative z-20 text-center px-4 animate-fade-in">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-md">
+                  Welcome to <span className="text-blue-400">Tomishop</span>
+                </h2>
+                <p className="text-xl text-gray-100 max-w-2xl mx-auto drop-shadow-sm">
+                  Discover amazing products at unbeatable prices. Quality guaranteed!
+                </p>
+              </div>
             </div>
 
-            <div className="mb-8 space-y-4">
-              <div className="relative max-w-2xl mx-auto">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="mb-8 space-y-4">
+                <div className="relative max-w-2xl mx-auto">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Filter size={20} />
+                    <span className="font-semibold">Filter:</span>
+                  </div>
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
+                        selectedCategory === category
+                          ? 'bg-blue-600 text-white shadow-lg scale-105'
+                          : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Filter size={20} />
-                  <span className="font-semibold">Filter:</span>
-                </div>
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
-                      selectedCategory === category
-                        ? 'bg-blue-600 text-white shadow-lg scale-105'
-                        : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
-                    }`}
-                  >
-                    {category}
-                  </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
                 ))}
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
-              ))}
+              {filteredProducts.length === 0 && (
+                <div className="text-center py-20">
+                  <p className="text-2xl text-gray-500">No products found</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('All');
+                    }}
+                    className="mt-4 text-blue-600 hover:text-blue-700 font-semibold"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
             </div>
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-2xl text-gray-500">No products found</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('All');
-                  }}
-                  className="mt-4 text-blue-600 hover:text-blue-700 font-semibold"
-                >
-                  Clear filters
-                </button>
-              </div>
-            )}
           </>
         )}
       </main>
 
-      {/* Simplified Footer as requested */}
       <footer className="bg-gray-900 text-white py-12 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
@@ -308,7 +326,7 @@ function App() {
                 <h3 className="text-2xl font-bold">Tomishop</h3>
               </div>
               <p className="text-gray-400">Your trusted online shopping destination</p>
-              <p className="text-gray-500 text-sm mt-4">&copy; 2024 Tomishop. All rights reserved.</p>
+              <p className="text-gray-500 text-sm mt-4">&copy; 2026 Tomishop. All rights reserved.</p>
             </div>
             
             <div className="flex flex-wrap justify-center gap-8">
