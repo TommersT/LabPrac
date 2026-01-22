@@ -241,7 +241,7 @@ function App() {
                 playsInline
                 className="absolute z-0 w-full h-full object-cover"
               >
-                <source src="https://player.vimeo.com/external/434045526.sd.mp4?s=c27cf34190aa0579177a3fa7a48ef89f074d2847&profile_id=165" type="video/mp4" />
+                <source src="/videos/hero-video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               
