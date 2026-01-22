@@ -1,28 +1,35 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Store, Search, Filter } from 'lucide-react';
+import { ShoppingCart, Store, Search, Filter, History } from 'lucide-react';
 import ProductCard from './components/ProductCard';
 import CartSidebar from './components/CartSidebar';
 import Toast from './components/Toast';
+import CheckoutPage from './components/CheckoutPage';
+import OrdersPage from './components/OrdersPage';
 import { products } from './data/products';
-import { CartItem, Product } from './types';
+import { CartItem, Product, ShippingInfo, Order } from './types';
 
 function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'shop' | 'checkout' | 'orders'>('shop');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Load Persisted Data
   useEffect(() => {
     const savedCart = localStorage.getItem('tomishop-cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+    const savedOrders = localStorage.getItem('tomishop-orders');
+    if (savedCart) setCartItems(JSON.parse(savedCart));
+    if (savedOrders) setOrders(JSON.parse(savedOrders));
   }, []);
 
+  // Sync with Local Storage
   useEffect(() => {
     localStorage.setItem('tomishop-cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    localStorage.setItem('tomishop-orders', JSON.stringify(orders));
+  }, [cartItems, orders]);
 
   const addToCart = (product: Product) => {
     setCartItems((prev) => {
@@ -59,6 +66,29 @@ function App() {
     setToast({ message: 'Cart cleared', type: 'info' });
   };
 
+  const handleCompleteOrder = (shippingInfo: ShippingInfo, paymentMethod: string) => {
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const tax = subtotal * 0.12;
+    const shippingFee = subtotal > 5000 ? 0 : 150;
+    const total = subtotal + tax + shippingFee;
+
+    const newOrder: Order = {
+      id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      date: new Date().toLocaleDateString('en-PH', { 
+        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+      }),
+      items: [...cartItems],
+      total: total,
+      shippingInfo,
+      paymentMethod
+    };
+
+    setOrders([newOrder, ...orders]);
+    setCartItems([]);
+    setCurrentPage('orders');
+    setToast({ message: 'Order placed successfully!', type: 'success' });
+  };
+
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const categories = ['All', ...new Set(products.map((p) => p.category))];
 
@@ -74,7 +104,7 @@ function App() {
       <header className="sticky top-0 z-30 bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('shop')}>
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
                 <Store className="text-white" size={28} />
               </div>
@@ -86,83 +116,109 @@ function App() {
               </div>
             </div>
 
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition-all duration-300 hover:shadow-lg active:scale-95"
-            >
-              <ShoppingCart size={24} />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-bounce">
-                  {totalItems}
-                </span>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setCurrentPage('orders')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                  currentPage === 'orders' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <History size={20} />
+                <span className="hidden md:inline">My Orders</span>
+              </button>
+
+              {currentPage === 'shop' && (
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 transition-all duration-300 hover:shadow-lg active:scale-95"
+                >
+                  <ShoppingCart size={24} />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-bounce">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
               )}
-            </button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Welcome to <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Tomishop</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover amazing products at unbeatable prices. Quality guaranteed!
-          </p>
-        </div>
-
-        <div className="mb-8 space-y-4">
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-            />
-          </div>
-
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Filter size={20} />
-              <span className="font-semibold">Filter:</span>
+        {currentPage === 'orders' ? (
+          <OrdersPage orders={orders} onBack={() => setCurrentPage('shop')} />
+        ) : currentPage === 'checkout' ? (
+          <CheckoutPage 
+            cartItems={cartItems} 
+            onBack={() => setCurrentPage('shop')} 
+            onCompleteOrder={handleCompleteOrder}
+          />
+        ) : (
+          <>
+            <div className="text-center mb-12 animate-fade-in">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Welcome to <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Tomishop</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Discover amazing products at unbeatable prices. Quality guaranteed!
+              </p>
             </div>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white shadow-lg scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
-          ))}
-        </div>
+            <div className="mb-8 space-y-4">
+              <div className="relative max-w-2xl mx-auto">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                />
+              </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-2xl text-gray-500">No products found</p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('All');
-              }}
-              className="mt-4 text-blue-600 hover:text-blue-700 font-semibold"
-            >
-              Clear filters
-            </button>
-          </div>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Filter size={20} />
+                  <span className="font-semibold">Filter:</span>
+                </div>
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
+                      selectedCategory === category
+                        ? 'bg-blue-600 text-white shadow-lg scale-105'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border-2 border-gray-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} onAddToCart={addToCart} />
+              ))}
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-2xl text-gray-500">No products found</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('All');
+                  }}
+                  className="mt-4 text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 
@@ -208,14 +264,14 @@ function App() {
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeItem}
         onClearCart={clearCart}
+        onCheckout={() => {
+          setIsCartOpen(false);
+          setCurrentPage('checkout');
+        }}
       />
 
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
     </div>
   );

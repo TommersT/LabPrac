@@ -8,6 +8,7 @@ interface CartSidebarProps {
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemoveItem: (id: number) => void;
   onClearCart: () => void;
+  onCheckout: () => void; // Added prop
 }
 
 export default function CartSidebar({
@@ -17,6 +18,7 @@ export default function CartSidebar({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
+  onCheckout, // Added prop
 }: CartSidebarProps) {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.12;
@@ -136,18 +138,16 @@ export default function CartSidebar({
                       {shipping === 0 ? 'FREE' : `₱${shipping}`}
                     </span>
                   </div>
-                  {subtotal < 5000 && subtotal > 0 && (
-                    <p className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                      Add ₱{(5000 - subtotal).toLocaleString()} more for free shipping!
-                    </p>
-                  )}
                   <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-300">
                     <span>Total:</span>
                     <span>₱{total.toLocaleString()}</span>
                   </div>
                 </div>
 
-                <button className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors mb-3 hover:shadow-lg active:scale-95">
+                <button 
+                  onClick={onCheckout} // Added click handler
+                  className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors mb-3 hover:shadow-lg active:scale-95"
+                >
                   Proceed to Checkout
                 </button>
 
