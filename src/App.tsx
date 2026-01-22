@@ -239,8 +239,10 @@ function App() {
                 loop 
                 muted 
                 playsInline
+                onError={() => console.error("Video failed to load from /videos/hero-video.mp4")}
                 className="absolute z-0 w-full h-full object-cover"
               >
+                {/* Referencing the file in public/videos/hero-video.mp4 */}
                 <source src="/videos/hero-video.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
